@@ -67,7 +67,7 @@ router.delete('/users/:id', auth(['admin']), async (req, res) => {
     }
 
     // Remove user's products as cleanup
-    const Product = require('../models/Product');
+    const Product = require('../models/Products');
     await Product.deleteMany({ seller: user._id });
 
     await User.deleteOne({ _id: user._id });

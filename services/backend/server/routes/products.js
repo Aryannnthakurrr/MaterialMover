@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const Product = require('../models/Product');
+const Product = require('../models/Products');
 const auth = require('../middleware/auth');
 require('dotenv').config();
 
@@ -9,8 +9,8 @@ require('dotenv').config();
 // 🆕 HELPER FUNCTION - Notify friend's API of product changes
 async function notifyFriendAPI(productData, action) {
   try {
-    const friendApiUrl= process.env.FRIEND_API_URL;
-    
+    const friendApiUrl = process.env.FRIEND_API_URL;
+
     if (!friendApiUrl) {
       console.log('⚠ FRIEND_API_URL not set in .env');
       return;
@@ -19,8 +19,8 @@ async function notifyFriendAPI(productData, action) {
     // Construct webhook URL using backticks for template literals
     const webhookUrl = friendApiUrl + '/webhook/' + action;
     console.log('📤 Notifying friend API: POST' + webhookUrl);
-    
-    const payload = { 
+
+    const payload = {
       product_id: productData._id.toString(),
       title: productData.title,
       category: productData.category,
@@ -30,14 +30,14 @@ async function notifyFriendAPI(productData, action) {
       address: productData.address,
       phone_no: productData.phone_no
     };
-    
+
     console.log('📦 Webhook payload:', payload);
-    
+
     const response = await axios.post(webhookUrl, payload, { timeout: 10000 });
-    
+
     console.log('✅' + action + ' webhook sent successfully: ', response.data);
   } catch (err) {
-    console.error('❌ Failed to notify friend API for ' +action + ':', err.message);
+    console.error('❌ Failed to notify friend API for ' + action + ':', err.message);
   }
 }
 
@@ -45,21 +45,21 @@ async function notifyFriendAPI(productData, action) {
 router.post('/search', auth([]), async (req, res) => {
   const { query } = req.body;
   if (!query) return res.status(400).json({ message: 'query required' });
-  
+
   try {
     const friendServerUrl = process.env.friendServer_Url;
-    
+
     if (friendServerUrl) {
       try {
-        const requestUrl = friendServerUrl+ '/recommend?query=' + encodeURIComponent(query);
+        const requestUrl = friendServerUrl + '/recommend?query=' + encodeURIComponent(query);
         console.log('Requesting from friend server:', requestUrl);
-        
+
         const resp = await axios.get(requestUrl, {
           timeout: 5000
         });
-        
+
         console.log('Friend server response:', resp.data);
-        
+
         let ids = [];
         if (Array.isArray(resp.data)) {
           ids = resp.data;
@@ -70,17 +70,17 @@ router.post('/search', auth([]), async (req, res) => {
         } else if (Array.isArray(resp.data.product_ids)) {
           ids = resp.data.product_ids;
         }
-        
+
         console.log('Extracted product IDs:', ids);
-        
+
         if (ids.length > 0) {
           const products = await Product.find({ _id: { $in: ids } });
           if (products.length > 0) {
-            console.log('Found ' +products.length +' products from friends recommendations');
+            console.log('Found ' + products.length + ' products from friends recommendations');
             return res.json({ products, source: 'friend' });
           }
         }
-        
+
         console.log('No products found from friend server, falling back to local search');
       } catch (friendServerErr) {
         console.error('Friend server error details:', {
@@ -103,7 +103,7 @@ router.post('/search', auth([]), async (req, res) => {
       ]
     }).limit(50);
 
-    console.log('Local search found ' +products.length + ' products');
+    console.log('Local search found ' + products.length + ' products');
     res.json({ products, source: 'local' });
   } catch (err) {
     console.error('Search error:', err.message);
@@ -137,8 +137,8 @@ router.post('/', auth(['seller', 'admin']), async (req, res) => {
   const { title, description, price, quantity, category, image, address, phone_no } = req.body;
   try {
     if (!title || !description || !category || typeof price !== 'number' || typeof quantity !== 'number' || !address || !phone_no) {
-      return res.status(400).json({ 
-        message: 'Missing required fields. Title, description, category, price, quantity, address, and phone number are required.' 
+      return res.status(400).json({
+        message: 'Missing required fields. Title, description, category, price, quantity, address, and phone number are required.'
       });
     }
 
@@ -149,10 +149,10 @@ router.post('/', auth(['seller', 'admin']), async (req, res) => {
       return res.status(400).json({ message: 'Quantity must be greater than or equal to 0' });
     }
 
-    const p = new Product({ 
-      title, 
-      description, 
-      price, 
+    const p = new Product({
+      title,
+      description,
+      price,
       quantity,
       category,
       image,
@@ -160,19 +160,19 @@ router.post('/', auth(['seller', 'admin']), async (req, res) => {
       phone_no,
       seller: req.user.id
     });
-    
+
     await p.save();
-    
+
     // Notify friend's API
     await notifyFriendAPI(p, 'product-added');
-    
+
     res.json({ product: p });
   } catch (err) {
     console.error('Product creation error:', err);
     if (err.name === 'ValidationError') {
-      return res.status(400).json({ 
-        message: 'Validation error', 
-        details: Object.values(err.errors).map(e => e.message) 
+      return res.status(400).json({
+        message: 'Validation error',
+        details: Object.values(err.errors).map(e => e.message)
       });
     }
     res.status(400).json({ message: 'Error creating product', error: err.message });
@@ -224,10 +224,10 @@ router.put('/:id', auth(['seller', 'admin']), async (req, res) => {
     if (phone_no !== undefined) product.phone_no = phone_no;
 
     await product.save();
-    
+
     // Notify friend's API
     await notifyFriendAPI(product, 'product-updated');
-    
+
     res.json({ product });
   } catch (err) {
     console.error('Update product error:', err);
@@ -245,11 +245,11 @@ router.delete('/:id', auth(['seller', 'admin']), async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    
+
     if (product.seller.toString() !== req.user.id && req.user.role !== 'admin') {
       return res.status(403).json({ message: 'Not authorized to delete this product' });
     }
-    
+
     await Product.deleteOne({ _id: req.params.id });
     res.json({ message: 'Product deleted successfully' });
   } catch (err) {
