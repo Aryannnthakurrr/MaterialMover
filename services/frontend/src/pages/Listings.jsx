@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import MapView from '../components/MapView';
 import { isLoggedIn, getAuthHeaders } from '../utils/auth';
 import '../styles/earth-scroll.css';
 
@@ -26,9 +27,9 @@ function ProductCard({ product }) {
                 <strong>Address:</strong> {product.address}
               </p>
             )}
-            {product.phone_number && (
+            {product.phone_no && (
               <p className="listing-phone">
-                <strong>Contact:</strong> {product.phone_number}
+                <strong>Contact:</strong> {product.phone_no}
               </p>
             )}
           </>
@@ -48,6 +49,9 @@ export default function Listings() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchMode, setSearchMode] = useState('text'); // 'text' or 'location'
+  const [nearbyProducts, setNearbyProducts] = useState([]);
+  const [radius, setRadius] = useState(50);
 
   const category = searchParams.get('category') || '';
   const query = searchParams.get('q') || '';
@@ -66,7 +70,6 @@ export default function Listings() {
     setLoading(true);
     try {
       if (searchTerm) {
-        // Search for specific category/query
         const resp = await fetch('/api/products/search', {
           method: 'POST',
           headers: getAuthHeaders(),
@@ -75,7 +78,6 @@ export default function Listings() {
         const j = await resp.json();
         if (resp.ok) setProducts(j.products || []);
       } else {
-        // Load all products
         const r = await fetch('/api/products');
         const j = await r.json();
         if (r.ok) setProducts(j.products || []);
@@ -87,9 +89,28 @@ export default function Listings() {
     }
   }
 
+  async function handleLocationSearch(lat, lng, searchRadius) {
+    try {
+      const headers = {};
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = 'Bearer ' + token;
+
+      const url = `/api/products/nearby?lat=${lat}&lng=${lng}&radius=${searchRadius}`;
+      const resp = await fetch(url, { headers });
+      const data = await resp.json();
+
+      if (resp.ok) {
+        setNearbyProducts(data.products || []);
+      }
+    } catch (err) {
+      console.error('Location search error:', err);
+    }
+  }
+
   function handleSearch(e) {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setSearchMode('text');
       navigate(`/listings?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   }
@@ -100,43 +121,81 @@ export default function Listings() {
     }
   }
 
+  const displayProducts = searchMode === 'location' ? nearbyProducts : products;
+
   return (
     <div className="listings-page">
       <Header />
 
       <div className="listings-container">
-        {/* Search Bar */}
-        <section className="listings-search">
-          <input
-            type="text"
-            placeholder="Search for materials (e.g. plywood, cement)"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            className="listings-search-input"
-          />
-          <button onClick={handleSearch} className="listings-search-btn">
-            Search
+        {/* Search Mode Toggle */}
+        <div className="search-mode-toggle">
+          <button
+            className={`mode-btn ${searchMode === 'text' ? 'active' : ''}`}
+            onClick={() => setSearchMode('text')}
+          >
+            🔍 Text Search
           </button>
-        </section>
+          <button
+            className={`mode-btn ${searchMode === 'location' ? 'active' : ''}`}
+            onClick={() => setSearchMode('location')}
+          >
+            📍 Nearby Search
+          </button>
+        </div>
+
+        {/* Text Search Bar */}
+        {searchMode === 'text' && (
+          <section className="listings-search">
+            <input
+              type="text"
+              placeholder="Search for materials (e.g. plywood, cement)"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="listings-search-input"
+            />
+            <button onClick={handleSearch} className="listings-search-btn">
+              Search
+            </button>
+          </section>
+        )}
+
+        {/* Map View for location search */}
+        {searchMode === 'location' && (
+          <MapView
+            products={nearbyProducts}
+            onLocationSearch={handleLocationSearch}
+            radius={radius}
+            onRadiusChange={setRadius}
+          />
+        )}
 
         {/* Category Title */}
         <h2 className="listings-title">
-          {category ? `${category} Listings` : query ? `Results for "${query}"` : 'All Listings'}
+          {searchMode === 'location'
+            ? `Nearby Listings (${nearbyProducts.length})`
+            : category
+              ? `${category} Listings`
+              : query
+                ? `Results for "${query}"`
+                : 'All Listings'}
         </h2>
 
         {/* Products Grid */}
-        {loading ? (
+        {loading && searchMode === 'text' ? (
           <div className="listings-loading">Loading...</div>
-        ) : products.length > 0 ? (
+        ) : displayProducts.length > 0 ? (
           <div className="listings-grid">
-            {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+            {displayProducts.map((product) => (
+              <ProductCard key={product._id} product={product} />
             ))}
           </div>
         ) : (
           <div className="listings-empty">
-            No products found. Try a different search.
+            {searchMode === 'location'
+              ? 'Click on the map or enable location to find nearby products.'
+              : 'No products found. Try a different search.'}
           </div>
         )}
 

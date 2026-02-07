@@ -1,10 +1,15 @@
 """MongoDB database operations"""
 import time
+import dns.resolver
 from typing import Dict, List, Optional
 from pymongo import MongoClient
 from pymongo.errors import AutoReconnect, ConnectionFailure
 from bson import ObjectId
 from app.core.config import settings
+
+# Force Google DNS to fix flaky local DNS resolution for MongoDB Atlas SRV records
+dns.resolver.default_resolver = dns.resolver.Resolver(configure=False)
+dns.resolver.default_resolver.nameservers = ['8.8.8.8', '8.8.4.4', '1.1.1.1']
 
 
 class DatabaseManager:
@@ -22,9 +27,9 @@ class DatabaseManager:
             try:
                 self.client = MongoClient(
                     settings.MONGODB_URI,
-                    serverSelectionTimeoutMS=30000,
-                    connectTimeoutMS=30000,
-                    socketTimeoutMS=60000,
+                    serverSelectionTimeoutMS=15000,
+                    connectTimeoutMS=15000,
+                    socketTimeoutMS=30000,
                     retryReads=True,
                     retryWrites=True,
                 )
@@ -47,7 +52,7 @@ class DatabaseManager:
         if self.client:
             self.client.close()
     
-    def get_all_materials(self, max_retries: int = 3, retry_delay: int = 3) -> List[Dict]:
+    def get_all_materials(self, max_retries: int = 5, retry_delay: int = 5) -> List[Dict]:
         """Retrieve all materials from database (excluding special index documents)"""
         if self.collection is None:
             raise RuntimeError("Database not connected")

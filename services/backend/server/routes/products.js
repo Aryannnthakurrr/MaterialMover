@@ -3,6 +3,7 @@ const router = express.Router();
 const axios = require('axios');
 const Product = require('../models/Products');
 const auth = require('../middleware/auth');
+const mapboxService = require('../services/mapboxService');
 require('dotenv').config();
 
 
@@ -111,6 +112,53 @@ router.post('/search', auth([]), async (req, res) => {
   }
 });
 
+// GET /api/products/nearby - Location-based search
+router.get('/nearby', auth([]), async (req, res) => {
+  try {
+    const { lat, lng, radius = 50, category } = req.query;
+
+    if (!lat || !lng) {
+      return res.status(400).json({ message: 'Latitude and longitude are required' });
+    }
+
+    const latitude = parseFloat(lat);
+    const longitude = parseFloat(lng);
+    const radiusInKm = parseFloat(radius);
+
+    if (isNaN(latitude) || isNaN(longitude) || isNaN(radiusInKm)) {
+      return res.status(400).json({ message: 'Invalid coordinates or radius' });
+    }
+
+    const query = {
+      location: {
+        $near: {
+          $geometry: {
+            type: 'Point',
+            coordinates: [longitude, latitude]
+          },
+          $maxDistance: radiusInKm * 1000
+        }
+      }
+    };
+
+    if (category && category !== 'all') {
+      query.category = category;
+    }
+
+    const products = await Product.find(query).limit(50).populate('seller', 'email');
+
+    res.json({
+      products,
+      searchCenter: { lat: latitude, lng: longitude },
+      radiusKm: radiusInKm,
+      resultsCount: products.length
+    });
+  } catch (err) {
+    console.error('Nearby search error:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 // GET /api/products/categories
 router.get('/categories', auth([]), async (req, res) => {
   res.json({ categories: Product.CATEGORIES });
@@ -149,7 +197,10 @@ router.post('/', auth(['seller', 'admin']), async (req, res) => {
       return res.status(400).json({ message: 'Quantity must be greater than or equal to 0' });
     }
 
-    const p = new Product({
+    // Geocode the address to get coordinates
+    const locationData = await mapboxService.geocodeAddress(address);
+
+    const productData = {
       title,
       description,
       price,
@@ -159,7 +210,20 @@ router.post('/', auth(['seller', 'admin']), async (req, res) => {
       address,
       phone_no,
       seller: req.user.id
-    });
+    };
+
+    if (locationData) {
+      productData.location = {
+        type: 'Point',
+        coordinates: locationData.coordinates,
+        formattedAddress: locationData.formattedAddress
+      };
+      console.log('Product location geocoded successfully');
+    } else {
+      console.log('Failed to geocode address, product saved without coordinates');
+    }
+
+    const p = new Product(productData);
 
     await p.save();
 
@@ -220,8 +284,22 @@ router.put('/:id', auth(['seller', 'admin']), async (req, res) => {
     if (quantity !== undefined) product.quantity = quantity;
     if (category !== undefined) product.category = category;
     if (image !== undefined) product.image = image;
-    if (address !== undefined) product.address = address;
     if (phone_no !== undefined) product.phone_no = phone_no;
+
+    // Re-geocode if address changed
+    if (address !== undefined && address !== product.address) {
+      product.address = address;
+      const locationData = await mapboxService.geocodeAddress(address);
+      if (locationData) {
+        product.location = {
+          type: 'Point',
+          coordinates: locationData.coordinates,
+          formattedAddress: locationData.formattedAddress
+        };
+      }
+    } else if (address !== undefined) {
+      product.address = address;
+    }
 
     await product.save();
 
