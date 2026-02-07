@@ -1,0 +1,153 @@
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+}
+
+.toast {
+  background: white;
+  color: #1f2937;
+  padding: 14px 24px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 320px;
+  max-width: 500px;
+  animation: slideInRight 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  border-left: 5px solid;
+  position: relative;
+  overflow: hidden;
+}
+
+.toast::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 100%;
+  background: currentColor;
+  opacity: 0.3;
+  animation: shrink 5s linear;
+}
+
+@keyframes shrink {
+  from { width: 100%; }
+  to { width: 0%; }
+}
+.toast.success {
+  border-left-color: #059669;
+  background: #ecfdf5;
+}
+
+.toast.error {
+  border-left-color: #dc2626;
+  background: #fef2f2;
+}
+
+.toast.info {
+  border-left-color: #2563eb;
+  background: #eff6ff;
+}
+
+.toast-icon {
+  font-size: 20px;
+}
+
+.toast.success .toast-icon {
+  color: #059669;
+}
+
+.toast.error .toast-icon {
+  color: #dc2626;
+}
+
+.toast.info .toast-icon {
+  color: #2563eb;
+}
+
+.toast-message {
+  flex: 1;
+  font-size: 14px;
+}
+
+.toast-close {
+  color: #6b7280;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  font-size: 18px;
+  opacity: 0.7;
+}
+
+.toast-close:hover {
+  opacity: 1;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+/* Confirmation toast styles */
+.confirm-toast {
+  background: #ffffff;
+  border-left: 4px solid #f87171;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease-out;
+}
+
+.confirm-toast .toast-message {
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.toast-btn {
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.toast-btn.yes {
+  background: #dc2626;
+  color: white;
+}
+
+.toast-btn.no {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.toast-btn:hover {
+  opacity: 0.9;
+}
+.confirm-toast .toast-actions {
+  display: flex;
+  gap: 8px;
+  margin-left: 12px;
+}

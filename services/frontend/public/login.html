@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Login - Material Mover</title>
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <main class="container auth">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <label>Email<input type="email" id="email" required placeholder="Enter your email"></label>
+        <label>Password<input type="password" id="password" required placeholder="Enter your password"></label>
+        <button type="submit">Login</button>
+      </form>
+      <div class="auth-help">
+        <p>Role will be determined by your email:</p>
+        <ul>
+          <li>Buyer: any email</li>
+          <li>Seller: must contain "seller@"</li>
+          <li>Admin: must contain "admin@"</li>
+        </ul>
+        <p>New? <a href="/signup.html">Sign up</a></p>
+      </div>
+    </main>
+    <script>
+      document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const resp = await fetch('/api/auth/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) });
+        const j = await resp.json();
+        if (resp.ok) {
+          localStorage.setItem('token', j.token);
+          localStorage.setItem('role', j.role);
+          localStorage.setItem('email', email);
+          if (j.role === 'seller') location.href = '/seller.html';
+          else if (j.role === 'admin') location.href = '/admin.html';
+          else location.href = '/';
+        } else alert(j.message || JSON.stringify(j));
+      });
+    </script>
+  </body>
+</html>
