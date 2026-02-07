@@ -1,0 +1,103 @@
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import Header from '../components/Header';
+
+export default function Login() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+    
+    try {
+      const resp = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+      const j = await resp.json();
+      if (resp.ok) {
+        localStorage.setItem('token', j.token);
+        localStorage.setItem('role', j.role);
+        localStorage.setItem('email', email);
+        if (j.role === 'seller') navigate('/seller');
+        else if (j.role === 'admin') navigate('/admin');
+        else navigate('/');
+      } else {
+        setError(j.message || 'Login failed. Please try again.');
+      }
+    } catch (err) {
+      setError('Login failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <>
+      <Header />
+      <main className="auth-container">
+        <div className="auth-card">
+          <div className="auth-header">
+            <h2>Welcome Back</h2>
+            <p>Sign in to your account to continue</p>
+          </div>
+
+          {error && <div className="auth-error">{error}</div>}
+
+          <form id="loginForm" onSubmit={handleSubmit} className="auth-form">
+            <div className="form-group">
+              <label htmlFor="email">Email Address</label>
+              <input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                placeholder="Enter your email"
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="password">Password</label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                placeholder="Enter your password"
+                className="form-input"
+              />
+            </div>
+
+            <button type="submit" className="auth-button" disabled={loading}>
+              {loading ? 'Signing in...' : 'Sign In'}
+            </button>
+          </form>
+
+          <div className="auth-divider">or</div>
+
+          <div className="auth-info">
+            <p className="info-title">📋 Role Information</p>
+            <ul className="role-list">
+              <li><span className="role-badge buyer">Buyer</span> Any email address</li>
+              <li><span className="role-badge seller">Seller</span> Email containing "seller@"</li>
+              <li><span className="role-badge admin">Admin</span> Email containing "admin@"</li>
+            </ul>
+          </div>
+
+          <div className="auth-footer">
+            <p>Don't have an account? <Link to="/signup" className="link">Create one</Link></p>
+          </div>
+        </div>
+      </main>
+    </>
+  );
+}
