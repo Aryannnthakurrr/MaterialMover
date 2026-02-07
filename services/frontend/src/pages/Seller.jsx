@@ -4,6 +4,7 @@ import Header from '../components/Header';
 import { useToast } from '../components/Toast';
 import { getToken, getRole, checkTokenExpiry, formatPrice, getAuthHeaders } from '../utils/auth';
 import '../styles/seller.css';
+import '../styles/earth-scroll.css';
 
 export default function Seller() {
   const toast = useToast();
@@ -25,6 +26,12 @@ export default function Seller() {
   const [address, setAddress] = useState('');
   const [phoneNo, setPhoneNo] = useState('');
   const [imageUrl, setImageUrl] = useState('');
+
+  // Apply dark theme
+  useEffect(() => {
+    document.body.classList.add('earth-scroll-page');
+    return () => document.body.classList.remove('earth-scroll-page');
+  }, []);
 
   useEffect(() => {
     if (!getToken() || getRole() !== 'seller') {
@@ -90,7 +97,7 @@ export default function Seller() {
 
   async function handleEditProduct(id) {
     try {
-      const resp = await fetch(`/api/products/${id}`, {
+      const resp = await fetch(`/ api / products / ${id} `, {
         headers: { Authorization: 'Bearer ' + getToken() },
       });
       if (!resp.ok) {
@@ -196,7 +203,7 @@ export default function Seller() {
       return;
     }
 
-    const endpoint = currentEditId ? `/api/products/${currentEditId}` : '/api/products';
+    const endpoint = currentEditId ? `/ api / products / ${currentEditId} ` : '/api/products';
     const method = currentEditId ? 'PUT' : 'POST';
 
     try {
@@ -237,7 +244,7 @@ export default function Seller() {
     }
     try {
       console.log('Deleting product with id:', id);
-      const resp = await fetch(`/api/products/${id}`, {
+      const resp = await fetch(`/ api / products / ${id} `, {
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + getToken() },
       });
@@ -259,7 +266,7 @@ export default function Seller() {
 
   return (
     <>
-      <Header title="Seller Dashboard" showHome={true} />
+      <Header />
 
       <main className="seller-container">
         <div className="seller-header">

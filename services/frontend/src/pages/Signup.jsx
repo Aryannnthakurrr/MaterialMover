@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import '../styles/earth-scroll.css';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -10,10 +11,16 @@ export default function Signup() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Apply dark theme
+  useEffect(() => {
+    document.body.classList.add('earth-scroll-page');
+    return () => document.body.classList.remove('earth-scroll-page');
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    
+
     if (!role) {
       setError('Please select your role (Buyer or Seller)');
       return;
@@ -81,10 +88,10 @@ export default function Signup() {
 
             <div className="form-group">
               <label htmlFor="role">I want to</label>
-              <select 
+              <select
                 id="role"
-                value={role} 
-                onChange={(e) => setRole(e.target.value)} 
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
                 required
                 className="form-input"
               >

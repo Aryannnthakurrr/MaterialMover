@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-
+import Chatbot from '../components/Chatbot';
 import Earth3D from '../components/Earth3D';
 import WasteScene from '../components/WasteScene';
 import ReactiveStars from '../components/ReactiveStars';
 
 import { isLoggedIn, getAuthHeaders, getRole } from '../utils/auth';
+import Footer from '../components/Footer';
 
 const CATEGORIES = [
   { name: 'Wood', icon: 'https://unpkg.com/lucide-static/icons/tree-pine.svg' },
@@ -68,12 +69,70 @@ function ProductCard({ product }) {
   );
 }
 
+// Auth Modal Component
+function AuthModal({ isOpen, onClose, mode, navigate }) {
+  if (!isOpen) return null;
+
+  const handleSignIn = () => {
+    onClose();
+    navigate('/login');
+  };
+
+  const handleSignUp = () => {
+    onClose();
+    navigate('/signup');
+  };
+
+  const handleGuest = () => {
+    onClose();
+    navigate('/listings');
+  };
+
+  return (
+    <div className="auth-modal-overlay" onClick={onClose}>
+      <div className="auth-modal-card" onClick={(e) => e.stopPropagation()}>
+        <button className="auth-modal-close" onClick={onClose}>×</button>
+        <h2>{mode === 'buy' ? 'Browse Materials' : 'Sell Materials'}</h2>
+        <p>{mode === 'buy'
+          ? 'Choose how you want to continue'
+          : 'Sign in or create an account to start selling'}
+        </p>
+        <div className="auth-modal-buttons">
+          <button className="auth-modal-btn auth-modal-btn-primary" onClick={handleSignIn}>
+            Sign In
+          </button>
+          <button className="auth-modal-btn auth-modal-btn-secondary" onClick={handleSignUp}>
+            Sign Up
+          </button>
+          {mode === 'buy' && (
+            <button className="auth-modal-btn auth-modal-btn-guest" onClick={handleGuest}>
+              Continue as Guest
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState([]);
   const [hoveredCategory, setHoveredCategory] = useState(null);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('buy'); // 'buy' or 'sell'
   const marketplaceRef = useRef(null);
   const navigate = useNavigate();
+
+  const handleBuyClick = () => {
+    setAuthModalMode('buy');
+    setAuthModalOpen(true);
+  };
+
+  const handleSellClick = () => {
+    setAuthModalMode('sell');
+    setAuthModalOpen(true);
+  };
 
   // Set dark background for landing hero
   useEffect(() => {
@@ -81,16 +140,12 @@ export default function Home() {
     return () => document.body.classList.remove('earth-scroll-page');
   }, []);
 
-  // Redirect logged-in sellers/admins
+  // Redirect logged-in admins (sellers can still view home page)
   useEffect(() => {
     if (isLoggedIn()) {
       const role = getRole();
       if (role === 'admin') {
         navigate('/admin');
-        return;
-      }
-      if (role === 'seller') {
-        navigate('/seller');
         return;
       }
     }
@@ -127,7 +182,7 @@ export default function Home() {
 
   function performSearch() {
     const q = query.trim();
-    if (!q) return alert('Enter a query');
+    // Allow empty search - will show all/featured products
     navigate(`/listings?q=${encodeURIComponent(q)}`);
   }
 
@@ -169,8 +224,10 @@ export default function Home() {
               <button className="hero-search-btn" onClick={() => performSearch()}>Search</button>
             </div>
             <div className="hero-buttons">
-              <button className="hero-btn hero-btn-buy">Buy</button>
-              <button className="hero-btn hero-btn-sell">Sell</button>
+              {/* <button className="hero-btn hero-btn-buy">Buy</button>
+              <button className="hero-btn hero-btn-sell">Sell</button> */}
+              <button className="hero-btn hero-btn-buy" onClick={handleBuyClick}>Buy</button>
+              <button className="hero-btn hero-btn-sell" onClick={handleSellClick}>Sell</button>
             </div>
             <h1>MaterialMover</h1>
             <p>Sustainable construction materials marketplace</p>
@@ -254,6 +311,16 @@ export default function Home() {
           </section>
         </div>
       </div>
+      <Chatbot />
+
+      {/* Auth Modal */}
+      <AuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
+        mode={authModalMode}
+        navigate={navigate}
+      />
+      
 
     </>
   );

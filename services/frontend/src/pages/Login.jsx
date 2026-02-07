@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import '../styles/earth-scroll.css';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,11 +10,17 @@ export default function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Apply dark theme
+  useEffect(() => {
+    document.body.classList.add('earth-scroll-page');
+    return () => document.body.classList.remove('earth-scroll-page');
+  }, []);
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    
+
     try {
       const resp = await fetch('/api/auth/login', {
         method: 'POST',
