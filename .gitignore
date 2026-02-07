@@ -51,3 +51,7 @@ error.txt
 
 # ===== ML Model Cache (downloaded at runtime) =====
 .cache/
+services/search/cache/bm25_doc_lengths.pkl
+services/search/cache/bm25_docmap.pkl
+services/search/cache/bm25_term_frequencies.pkl
+services/search/cache/bm25_index.pkl
