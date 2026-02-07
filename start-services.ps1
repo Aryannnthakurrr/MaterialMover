@@ -1,8 +1,8 @@
 # Start MaterialMover Services
 Write-Host "Starting MaterialMover services..." -ForegroundColor Green
 
-# Stop any existing PM2 processes
-pm2 stop all 2>$null
+# Stop any existing Node.js and Python processes
+Get-Process | Where-Object {$_.Name -like "*node*" -or $_.Name -like "*python*"} | Stop-Process -Force -ErrorAction SilentlyContinue
 
 # Start Node.js backend
 Write-Host "Starting backend on port 3000..." -ForegroundColor Cyan
@@ -12,7 +12,7 @@ Start-Process -FilePath "node" -ArgumentList "api/index.js" -WorkingDirectory "$
 Write-Host "Starting search on port 8000..." -ForegroundColor Cyan
 $env:PYTHONIOENCODING = "utf-8"
 $env:PYTHONUTF8 = "1"
-Start-Process -FilePath "$PSScriptRoot\services\search\.venv\Scripts\python.exe" -ArgumentList "-m uvicorn app.main:app --host 0.0.0.0 --port 8000" -WorkingDirectory "$PSScriptRoot\services\search" -WindowStyle Minimized
+Start-Process -FilePath "python" -ArgumentList "-m uvicorn app.main:app --host 0.0.0.0 --port 8000" -WorkingDirectory "$PSScriptRoot\services\search" -WindowStyle Minimized
 
 Write-Host ""
 Write-Host "Services started!" -ForegroundColor Green
