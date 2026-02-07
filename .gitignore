@@ -46,6 +46,15 @@ services/backend/uploads/
 *.temp
 error.txt
 
+# ===== Generated Preview Files =====
+services/backend/scripts/image-preview.html
+
+# ===== One-off Migration/Utility Scripts =====
+services/backend/scripts/check-image-status.js
+services/backend/scripts/fix-remaining-images.js
+services/backend/scripts/populate-images.js
+services/backend/scripts/preview-images.js
+
 # ===== UV Lock (optional - some prefer to commit this) =====
 # uv.lock
 
