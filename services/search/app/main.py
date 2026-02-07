@@ -12,10 +12,13 @@ from app.models.schemas import (
     WebhookProductAdded, WebhookProductUpdated 
 )
 from app.services.hybrid_search import HybridSearchEngine
+from app.services.gemini_chat import GeminiChatService
+from app.routers.chat import router as chat_router, set_chat_service
 
 
-# Global search engine instance
+# Global service instances
 search_engine: Optional[HybridSearchEngine] = None
+chat_service: Optional[GeminiChatService] = None
 
 
 @asynccontextmanager
@@ -27,6 +30,18 @@ async def lifespan(app: FastAPI):
     search_engine = HybridSearchEngine()
     search_engine.initialize()
     print("Search engine ready!")
+    
+    # Initialise Gemini chat service
+    global chat_service
+    try:
+        chat_service = GeminiChatService()
+        chat_service.initialize()
+        chat_service.set_search_engine(search_engine)
+        set_chat_service(chat_service)
+        print("✅ Chat advisor ready!")
+    except Exception as e:
+        print(f"⚠️  Chat advisor disabled (Gemini init failed): {e}")
+        chat_service = None
     
     yield
     
@@ -62,6 +77,8 @@ app.add_middleware(
 )
 # ===== END CORS CONFIGURATION =====
 
+# Register chat advisor router
+app.include_router(chat_router)
 
 
 @app.get("/", tags=["General"])
@@ -72,6 +89,10 @@ async def root():
         "version": settings.API_VERSION,
         "endpoints": {
             "search": "/search",
+            "recommend": "/recommend",
+            "chat_start": "/chat/start",
+            "chat_message": "/chat/message",
+            "chat_history": "/chat/history/{session_id}",
             "health": "/health",
             "rebuild_cache": "/rebuild-cache",
             "docs": "/docs"

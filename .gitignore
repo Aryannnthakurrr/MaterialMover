@@ -49,5 +49,4 @@ error.txt
 # ===== UV Lock (optional - some prefer to commit this) =====
 # uv.lock
 
-# ===== ML Model Cache (downloaded at runtime) =====
-.cache/
+

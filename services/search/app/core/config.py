@@ -16,6 +16,10 @@ class Settings:
     MONGODB_DATABASE: str = os.getenv("MONGODB_DATABASE", "product")
     MONGODB_COLLECTION: str = os.getenv("MONGODB_COLLECTION", "products")
     
+    # Gemini AI
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    
     # Model
     MODEL_NAME: str = "all-MiniLM-L6-v2"
     EMBEDDING_DIMENSION: int = 384

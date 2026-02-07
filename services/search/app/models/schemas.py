@@ -81,3 +81,74 @@ class HealthResponse(BaseModel):
     status: str
     materials_loaded: int
     model: str
+
+
+# ===== CHAT ADVISOR SCHEMAS =====
+
+class ChatStartResponse(BaseModel):
+    """Response when a new chat session is created"""
+    session_id: str
+    message: str
+    status: str  # "active"
+
+
+class ChatMessageRequest(BaseModel):
+    """Request body for sending a chat message"""
+    session_id: str = Field(..., description="Session ID from /chat/start")
+    message: str = Field(..., min_length=1, description="User's message")
+
+
+class ChatProductItem(BaseModel):
+    """A recommended product returned by the chat advisor.
+
+    Fields mirror the MongoDB Product schema so the React carousel can
+    render cards without any extra mapping.
+    """
+    id: str = Field(alias="_id")
+    title: str
+    description: Optional[str] = ""
+    category: Optional[str] = ""
+    price: Optional[float] = 0
+    quantity: Optional[int] = 0
+    image: Optional[str] = ""
+    phone_no: Optional[str] = ""
+    address: Optional[str] = ""
+    seller: Optional[str] = None
+    relevance_score: Optional[float] = None
+    createdAt: Optional[str] = None
+    updatedAt: Optional[str] = None
+
+    class Config:
+        populate_by_name = True
+
+
+class ChatMessageResponse(BaseModel):
+    """Response from the chat advisor.
+
+    When ``status`` is ``"completed"``, the ``products`` list contains
+    carousel-ready product objects and ``reasoning`` / ``query_used``
+    explain how the recommendations were derived.
+    """
+    session_id: str
+    message: str
+    status: str  # "active" | "completed"
+    reasoning: Optional[str] = None
+    query_used: Optional[str] = None
+    products: Optional[List[ChatProductItem]] = None
+
+
+class ChatMessageEntry(BaseModel):
+    """A single message in the conversation history"""
+    role: str  # "user" | "assistant"
+    content: str
+
+
+class ChatHistoryResponse(BaseModel):
+    """Full conversation history for a session"""
+    session_id: str
+    status: str
+    messages: List[ChatMessageEntry]
+    created_at: str
+    products: Optional[List[ChatProductItem]] = None
+
+# ===== END CHAT ADVISOR SCHEMAS =====
