@@ -13,8 +13,8 @@ app.use(express.json());
 const { connectDB } = require('../server/db');
 connectDB();
 
-// serve static frontend and uploads
-app.use('/', express.static(path.join(__dirname, '../../frontend/public')));
+// serve static frontend (React build) and uploads
+app.use('/', express.static(path.join(__dirname, '../../frontend/dist')));
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // routes
@@ -24,6 +24,11 @@ app.use('/api/upload', require('../server/routes/upload'));
 
 // Basic health
 app.get('/api/health', (req, res) => res.json({ ok: true }));
+
+// SPA fallback — serve index.html for all non-API routes
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
+});
 
 // If running locally start express server
 if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
