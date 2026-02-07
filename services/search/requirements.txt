@@ -1,0 +1,8 @@
+# Core dependencies for Construction Materials Semantic Search API
+fastapi>=0.115.0
+uvicorn[standard]>=0.32.0
+sentence-transformers>=5.1.2
+pymongo>=4.15.0
+numpy>=2.3.4
+python-dotenv>=1.1.0
+nltk>=3.8.1
