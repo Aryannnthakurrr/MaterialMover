@@ -4,7 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Material Mover - Buyer</title>
+    <meta name="mapbox-token" content="pk.eyJ1IjoiYW5pc2htYW5jaGFuZGEiLCJhIjoiY21sYjZrNHZxMGs1MjNjczI3NnhjZXIydiJ9.xxMx_j2EyIKuotbCl2adwA">
     <link rel="stylesheet" href="/css/style.css">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.css" rel="stylesheet">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.0/mapbox-gl.js"></script>
   </head>
   <body>
     <header class="site-header">
@@ -22,6 +25,28 @@
       <section class="search-box">
         <input id="query" placeholder="Search for materials (e.g. plywood, cement)" />
         <button id="searchBtn">Search</button>
+      </section>
+      
+      <!-- Location-based Search Section -->
+      <section class="location-search">
+        <div class="location-controls">
+          <div class="location-display">
+            <label>Your Location:</label>
+            <span id="current-location">Click map or enable location</span>
+          </div>
+          <div class="radius-control">
+            <label for="search-radius">Search Radius:</label>
+            <select id="search-radius">
+              <option value="10">10 km</option>
+              <option value="25">25 km</option>
+              <option value="50" selected>50 km</option>
+              <option value="100">100 km</option>
+              <option value="200">200 km</option>
+            </select>
+          </div>
+          <button id="location-search-btn">Search Nearby</button>
+        </div>
+        <div id="map-container" class="map-container"></div>
       </section>
       
 <!-- Horizontal Category Tabs -->
@@ -58,5 +83,6 @@
     </main>
 
     <script src="/js/app.js"></script>
+    <script src="/js/map.js"></script>
   </body>
 </html>

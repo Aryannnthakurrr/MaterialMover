@@ -46,6 +46,64 @@ async function performSearch() {
   }
 }
 
+// --- NEW: Location-based search function ---
+window.productSearch = {
+  async searchNearby(lat, lng, radius) {
+    const token = localStorage.getItem('token');
+    const headers = {};
+    if (token) headers['Authorization'] = 'Bearer ' + token;
+    
+    try {
+      const url = `/api/products/nearby?lat=${lat}&lng=${lng}&radius=${radius}`;
+      const response = await fetch(url, { headers });
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Location search failed');
+      }
+      
+      renderProducts(data.products || []);
+      
+      // Update map with results
+      if (window.mapManager && window.mapManager.addProductMarkers) {
+        window.mapManager.addProductMarkers(data.products || []);
+      }
+      
+      // Show search summary
+      const summary = document.getElementById('search-summary') || createSearchSummary();
+      summary.textContent = `Found ${data.resultsCount} products within ${radius}km`;
+      summary.style.display = 'block';
+      
+    } catch (err) {
+      console.error('Location search error:', err);
+      alert('Location search failed: ' + err.message);
+    }
+  }
+};
+
+function createSearchSummary() {
+  const summary = document.createElement('div');
+  summary.id = 'search-summary';
+  summary.style.cssText = `
+    background: var(--accent);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 8px;
+    margin: 16px 0;
+    font-size: 0.875rem;
+    text-align: center;
+    display: none;
+  `;
+  document.querySelector('.container').insertBefore(summary, document.getElementById('products'));
+  return summary;
+}
+
+// Global function for viewing individual products
+window.viewProduct = function(productId) {
+  // You can implement product detail page later
+  alert(`View product: ${productId}`);
+};
+
 // --- UPDATED: Button click now calls the new function ---
 document.getElementById('searchBtn')?.addEventListener('click', performSearch);
 
@@ -116,6 +174,36 @@ async function loadInitial() {
   const j = await r.json();
   if (r.ok) renderProducts(j.products || []);
   updateHeader();
+  
+  // Set up location search event listeners
+  setupLocationSearchListeners();
+}
+
+function setupLocationSearchListeners() {
+  // Location search button
+  const locationSearchBtn = document.getElementById('location-search-btn');
+  if (locationSearchBtn) {
+    locationSearchBtn.addEventListener('click', () => {
+      if (window.mapManager && window.mapManager.userLocation) {
+        const [lng, lat] = window.mapManager.userLocation;
+        const radius = document.getElementById('search-radius').value;
+        window.productSearch.searchNearby(lat, lng, radius);
+      } else {
+        alert('Please enable location or click on the map to set your location first');
+      }
+    });
+  }
+  
+  // Radius change handler
+  const radiusSelect = document.getElementById('search-radius');
+  if (radiusSelect) {
+    radiusSelect.addEventListener('change', (e) => {
+      const radius = parseInt(e.target.value);
+      if (window.mapManager) {
+        window.mapManager.setRadius(radius);
+      }
+    });
+  }
 }
 
 loadInitial();
