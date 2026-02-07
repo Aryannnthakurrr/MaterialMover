@@ -3,8 +3,12 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const mongoose = require('mongoose');
+const { OAuth2Client } = require('google-auth-library');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+
+// Google OAuth client
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // Admin: Get all users
 router.get('/users', auth(['admin']), async (req, res) => {
@@ -132,6 +136,12 @@ router.post('/login', async (req, res) => {
   try {
     const user = await User.findOne({ email });
     if (!user) return res.status(400).json({ message: 'Invalid credentials' });
+    
+    // Check if user signed up with Google
+    if (user.authProvider === 'google') {
+      return res.status(400).json({ message: 'Please sign in with Google' });
+    }
+    
     const ok = await bcrypt.compare(password, user.password);
     if (!ok) return res.status(400).json({ message: 'Invalid credentials' });
     const token = jwt.sign({ id: user._id, email: user.email, role: user.role }, process.env.JWT_SECRET || 'replace_with_a_strong_secret', { expiresIn: '7d' });
@@ -139,6 +149,60 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// POST /api/auth/google - Google OAuth login/signup
+router.post('/google', async (req, res) => {
+  const { credential, role } = req.body;
+  
+  if (!credential) {
+    return res.status(400).json({ message: 'Google credential required' });
+  }
+
+  try {
+    // Verify Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    
+    const payload = ticket.getPayload();
+    const { sub: googleId, email, name } = payload;
+
+    // Check if user exists
+    let user = await User.findOne({ $or: [{ googleId }, { email }] });
+
+    if (user) {
+      // User exists - update googleId if not set (linking accounts)
+      if (!user.googleId) {
+        user.googleId = googleId;
+        user.authProvider = 'google';
+        await user.save();
+      }
+    } else {
+      // New user - create account
+      const userRole = role && ['buyer', 'seller'].includes(role) ? role : 'buyer';
+      user = new User({
+        email,
+        googleId,
+        role: userRole,
+        authProvider: 'google'
+      });
+      await user.save();
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user._id, email: user.email, role: user.role },
+      process.env.JWT_SECRET || 'replace_with_a_strong_secret',
+      { expiresIn: '7d' }
+    );
+
+    res.json({ token, role: user.role, email: user.email });
+  } catch (err) {
+    console.error('Google auth error:', err);
+    res.status(401).json({ message: 'Invalid Google token' });
   }
 });
 

@@ -336,6 +336,15 @@ body::before {
 select#role{padding:12px;border-radius:10px;border:1px solid #e9f0fb;background:var(--panel);font-size:14px;cursor:pointer}
 select#role option{padding:8px}
 
+/* Google Sign-In styling */
+.auth-divider{display:flex;align-items:center;margin:20px 0;color:var(--muted);font-size:14px}
+.auth-divider hr{flex:1;border:none;height:1px;background:#e9f0fb;margin:0 12px}
+.auth-divider span{padding:0 8px;background:var(--panel)}
+.google-signup{margin-top:12px}
+.google-signup label{margin-bottom:8px;display:block}
+.google-signup select{padding:10px;border-radius:8px;border:1px solid #e9f0fb;background:var(--panel);font-size:14px;width:100%;margin-bottom:12px}
+.g_id_signin{margin:0 auto;display:flex;justify-content:center}
+
 /* Seller / admin small utilities */
 .container section{margin-bottom:18px}
 
