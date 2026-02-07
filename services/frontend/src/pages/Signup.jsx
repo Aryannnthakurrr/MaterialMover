@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
 import '../styles/earth-scroll.css';
+
+const GOOGLE_CLIENT_ID = '315899476122-jebvtaiu62io7bhej450n8tqcofjmrbi.apps.googleusercontent.com';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -10,6 +12,49 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const googleBtnRef = useRef(null);
+
+  useEffect(() => {
+    if (window.google) {
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+      });
+      window.google.accounts.id.renderButton(googleBtnRef.current, {
+        theme: 'outline',
+        size: 'large',
+        width: '100%',
+        text: 'signup_with',
+      });
+    }
+  }, []);
+
+  async function handleGoogleResponse(response) {
+    setError('');
+    setLoading(true);
+    try {
+      const resp = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ credential: response.credential, role: role || 'buyer' }),
+      });
+      const j = await resp.json();
+      if (resp.ok) {
+        localStorage.setItem('token', j.token);
+        localStorage.setItem('role', j.role);
+        localStorage.setItem('email', j.email);
+        if (j.role === 'seller') navigate('/seller');
+        else if (j.role === 'admin') navigate('/admin');
+        else navigate('/');
+      } else {
+        setError(j.message || 'Google sign-up failed.');
+      }
+    } catch (err) {
+      setError('Google sign-up failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }
 
   // Apply dark theme
   useEffect(() => {
@@ -107,6 +152,11 @@ export default function Signup() {
           </form>
 
           <div className="auth-divider">or</div>
+
+          <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}></div>
+          <p style={{ textAlign: 'center', fontSize: '13px', color: '#888', marginBottom: '12px' }}>
+            Select a role above before signing up with Google (defaults to Buyer)
+          </p>
 
           <div className="auth-info">
             <p className="info-title">🎯 Choose Your Role</p>
