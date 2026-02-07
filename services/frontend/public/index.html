@@ -1,0 +1,62 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Material Mover - Buyer</title>
+    <link rel="stylesheet" href="/css/style.css">
+  </head>
+  <body>
+    <header class="site-header">
+      <h1>Material Mover</h1>
+      <nav>
+        <a href="/login.html" id="loginLink">Login</a>
+        <span id="userInfo" style="display:none">
+          <!-- Welcome <span id="userEmail"></span> -->
+          <a href="#" id="logoutBtn">Logout</a>
+        </span>
+      </nav>
+    </header>
+
+    <main class="container">
+      <section class="search-box">
+        <input id="query" placeholder="Search for materials (e.g. plywood, cement)" />
+        <button id="searchBtn">Search</button>
+      </section>
+      
+<!-- Horizontal Category Tabs -->
+<section class="feature-categories">
+  <div class="category-row">
+    <div class="category-item" data-category="Wood">
+      <img src="https://unpkg.com/lucide-static/icons/tree-pine.svg" alt="Wood">
+      <span>Wood</span>
+    </div>
+    <div class="category-item" data-category="Glass">
+      <img src="https://unpkg.com/lucide-static/icons/panel-bottom-close.svg" alt="Glass">
+      <span>Glass</span>
+    </div>
+    <div class="category-item" data-category="Metals">
+      <img src="https://unpkg.com/lucide-static/icons/hammer.svg" alt="Metals">
+      <span>Metals</span>
+    </div>
+    <div class="category-item" data-category="Cement">
+      <img src="https://unpkg.com/lucide-static/icons/brick-wall.svg" alt="Cement">
+      <span>Cement</span>
+    </div>
+    <div class="category-item" data-category="Plastic">
+  <img src="https://unpkg.com/lucide-static/icons/cup-soda.svg" alt="Plastic">
+  <span>Plastic</span>
+</div>
+
+  </div>
+</section>
+
+
+
+
+      <section id="products" class="products-grid"></section>
+    </main>
+
+    <script src="/js/app.js"></script>
+  </body>
+</html>
