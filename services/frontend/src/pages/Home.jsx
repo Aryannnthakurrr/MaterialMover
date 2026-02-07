@@ -1,7 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
-import Footer from '../components/Footer';
+
+import Earth3D from '../components/Earth3D';
+import WasteScene from '../components/WasteScene';
+import ReactiveStars from '../components/ReactiveStars';
+
 import { isLoggedIn, getAuthHeaders, getRole } from '../utils/auth';
 
 const CATEGORIES = [
@@ -67,7 +71,15 @@ function ProductCard({ product }) {
 export default function Home() {
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState([]);
+  const [hoveredCategory, setHoveredCategory] = useState(null);
+  const marketplaceRef = useRef(null);
   const navigate = useNavigate();
+
+  // Set dark background for landing hero
+  useEffect(() => {
+    document.body.classList.add('earth-scroll-page');
+    return () => document.body.classList.remove('earth-scroll-page');
+  }, []);
 
   // Redirect logged-in sellers/admins
   useEffect(() => {
@@ -95,23 +107,28 @@ export default function Home() {
     }
   }
 
-  async function performSearch(searchQuery) {
-    const q = searchQuery !== undefined ? searchQuery : query.trim();
-    if (!q) return alert('Enter a query');
+  // Get 3 preview products for a category
+  function getPreviewProducts(category) {
+    if (!category || products.length === 0) return [];
 
-    try {
-      const resp = await fetch('/api/products/search', {
-        method: 'POST',
-        headers: getAuthHeaders(),
-        body: JSON.stringify({ query: q }),
-      });
-      const j = await resp.json();
-      if (!resp.ok) return alert(j.message || JSON.stringify(j));
-      setProducts(j.products || []);
-    } catch (err) {
-      console.error('Search failed:', err);
-      alert('Search failed. Please try again.');
+    // Try to filter by category
+    const filtered = products.filter(p =>
+      p.title?.toLowerCase().includes(category.toLowerCase()) ||
+      p.description?.toLowerCase().includes(category.toLowerCase()) ||
+      p.category?.toLowerCase() === category.toLowerCase()
+    );
+
+    // If we have matches, return them; otherwise return first 3 products as preview
+    if (filtered.length > 0) {
+      return filtered.slice(0, 3);
     }
+    return products.slice(0, 3);
+  }
+
+  function performSearch() {
+    const q = query.trim();
+    if (!q) return alert('Enter a query');
+    navigate(`/listings?q=${encodeURIComponent(q)}`);
   }
 
   function handleKeyDown(e) {
@@ -122,52 +139,122 @@ export default function Home() {
   }
 
   function handleCategoryClick(category) {
-    setQuery(category);
-    performSearch(category);
+    navigate(`/listings?category=${encodeURIComponent(category)}`);
   }
+
+  const scrollToMarketplace = () => {
+    marketplaceRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   return (
     <>
       <Header />
-      <main className="container">
-        <section className="search-box">
-          <input
-            id="query"
-            placeholder="Search for materials (e.g. plywood, cement)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-          <button id="searchBtn" onClick={() => performSearch()}>
-            Search
-          </button>
-        </section>
 
-        <section className="feature-categories">
-          <div className="category-row">
-            {CATEGORIES.map((cat) => (
-              <div
-                key={cat.name}
-                className="category-item"
-                data-category={cat.name}
-                onClick={() => handleCategoryClick(cat.name)}
-              >
-                <img src={cat.icon} alt={cat.name} />
-                <span>{cat.name}</span>
-              </div>
-            ))}
+      {/* ===== Landing Hero ===== */}
+      <Earth3D />
+      <WasteScene />
+
+      <main className="scroll-container">
+        <section className="scroll-section" id="section-1">
+          <div className="content center-align">
+            <div className="hero-search-box">
+              <input
+                type="text"
+                placeholder="Search materials..."
+                className="hero-search-input"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={handleKeyDown}
+              />
+              <button className="hero-search-btn" onClick={() => performSearch()}>Search</button>
+            </div>
+            <div className="hero-buttons">
+              <button className="hero-btn hero-btn-buy">Buy</button>
+              <button className="hero-btn hero-btn-sell">Sell</button>
+            </div>
+            <h1>MaterialMover</h1>
+            <p>Sustainable construction materials marketplace</p>
           </div>
         </section>
 
-        <section id="products" className="products-grid">
-          {products.length === 0 ? (
-            <p>No results</p>
-          ) : (
-            products.map((p) => <ProductCard key={p._id} product={p} />)
-          )}
+        <section className="scroll-section" id="section-2">
+          <div className="content center-align">
+            <h2>Reduce. Reuse. Rebuild.</h2>
+            <p>Giving construction materials a second life.</p>
+          </div>
+        </section>
+
+        <section className="scroll-section scroll-section-long" id="section-3">
+          <div className="content center-align" style={{ zIndex: 20, position: 'relative' }}>
+            <button onClick={scrollToMarketplace} className="enter-button">
+              Enter Marketplace →
+            </button>
+          </div>
         </section>
       </main>
-      <Footer />
+
+
+      {/* ===== Marketplace ===== */}
+      <div ref={marketplaceRef} className="marketplace-section">
+        <div className="container">
+          <section className="search-box">
+            <input
+              id="query"
+              placeholder="Search for materials (e.g. plywood, cement)"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <button id="searchBtn" onClick={() => performSearch()}>
+              Search
+            </button>
+          </section>
+
+          <section
+            className="feature-categories"
+            onMouseLeave={() => setHoveredCategory(null)}
+          >
+            <div className="category-column">
+              {CATEGORIES.map((cat) => (
+                <div
+                  key={cat.name}
+                  className={`category-item ${hoveredCategory === cat.name ? 'active' : ''}`}
+                  data-category={cat.name}
+                  onClick={() => handleCategoryClick(cat.name)}
+                  onMouseEnter={() => setHoveredCategory(cat.name)}
+                >
+                  <img src={cat.icon} alt={cat.name} />
+                  <span>{cat.name}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Fixed preview section below icons */}
+            <div className="preview-section">
+              {hoveredCategory && (
+                <div className="preview-products">
+                  {getPreviewProducts(hoveredCategory).length > 0 ? (
+                    getPreviewProducts(hoveredCategory).map((product, idx) => (
+                      <div key={product.id || idx} className="preview-card">
+                        <img
+                          src={product.image || '/images/placeholder.png'}
+                          alt={product.title}
+                          className="preview-image"
+                        />
+                        <span className="preview-title">{product.title}</span>
+                        <span className="preview-price">₹{product.price || 0}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="preview-empty">No items yet</div>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+      </div>
+
     </>
   );
 }

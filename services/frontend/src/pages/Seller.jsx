@@ -230,24 +230,29 @@ export default function Seller() {
   }
 
   async function handleDeleteProduct(id) {
-    const confirmed = await toast.showConfirm('🗑️ Delete this product?');
+    const confirmed = window.confirm('Are you sure you want to delete this product?');
     if (!confirmed) {
       toast.info('Deletion cancelled');
       return;
     }
     try {
+      console.log('Deleting product with id:', id);
       const resp = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + getToken() },
       });
-      const data = await resp.json();
-      if (resp.ok) {
-        toast.success('✅ Product deleted');
-        loadMyProducts();
-      } else {
+
+      if (!resp.ok) {
+        const data = await resp.json();
         toast.error(data.message || 'Error deleting product');
+        return;
       }
+
+      toast.success('✅ Product deleted');
+      // Reload products from server
+      await loadMyProducts();
     } catch (err) {
+      console.error('Delete error:', err);
       toast.error('Error deleting product. Please try again.');
     }
   }
@@ -262,8 +267,8 @@ export default function Seller() {
             <h2>📦 Seller Dashboard</h2>
             <p>Manage and list your construction materials</p>
           </div>
-          <button 
-            className="btn-add-product" 
+          <button
+            className="btn-add-product"
             onClick={() => {
               if (!showForm) {
                 resetForm();
@@ -313,10 +318,10 @@ export default function Seller() {
 
                   <div className="form-group">
                     <label htmlFor="category">Category *</label>
-                    <select 
-                      id="category" 
-                      required 
-                      value={category} 
+                    <select
+                      id="category"
+                      required
+                      value={category}
                       onChange={(e) => setCategory(e.target.value)}
                       className="form-input"
                     >
@@ -441,8 +446,8 @@ export default function Seller() {
                 <div className="empty-icon">📦</div>
                 <h4>No products yet</h4>
                 <p>Start selling by adding your first product</p>
-                <button 
-                  className="btn-add-product" 
+                <button
+                  className="btn-add-product"
                   onClick={() => {
                     resetForm();
                     setShowForm(true);
@@ -454,10 +459,10 @@ export default function Seller() {
             ) : (
               <div className="products-grid">
                 {products.map((product) => (
-                  <div className="product-card" key={product._id}>
+                  <div className="product-card" key={product._id || product.id}>
                     <div className="product-image">
-                      <img 
-                        src={product.image || '/images/placeholder.png'} 
+                      <img
+                        src={product.image || '/images/placeholder.png'}
                         alt={product.title}
                       />
                       <span className="product-category">{product.category}</span>
@@ -481,16 +486,16 @@ export default function Seller() {
                       <div className="product-footer">
                         <div className="price">{formatPrice(product.price)}</div>
                         <div className="product-actions">
-                          <button 
+                          <button
                             className="btn-icon edit"
-                            onClick={() => handleEditProduct(product._id)}
+                            onClick={() => handleEditProduct(product._id || product.id)}
                             title="Edit product"
                           >
                             ✏️ Edit
                           </button>
-                          <button 
+                          <button
                             className="btn-icon delete"
-                            onClick={() => handleDeleteProduct(product._id)}
+                            onClick={() => handleDeleteProduct(product._id || product.id)}
                             title="Delete product"
                           >
                             🗑️ Delete

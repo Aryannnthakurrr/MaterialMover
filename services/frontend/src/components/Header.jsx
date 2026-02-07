@@ -14,7 +14,9 @@ export default function Header({ title = 'Material Mover', showHome = false }) {
 
   return (
     <header className="site-header">
-      <h1>{title}</h1>
+      <Link to="/" className="header-logo">
+        <h1>{title}</h1>
+      </Link>
       <nav>
         {showHome && <Link to="/">Home</Link>}
         {!token ? (
