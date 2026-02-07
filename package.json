@@ -1,0 +1,33 @@
+{
+  "name": "material-mover",
+  "version": "1.0.0",
+  "description": "Material Mover - buyer/seller/admin example with JWT auth and search webhook integration",
+  "main": "services/backend/api/index.js",
+  "scripts": {
+    "start": "node services/backend/api/index.js",
+    "dev": "nodemon services/backend/api/index.js",
+    "seed": "node seed/seed.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@mapbox/mapbox-gl-geocoder": "^5.1.2",
+    "axios": "^1.13.2",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
+    "google-auth-library": "^10.5.0",
+    "jsonwebtoken": "^9.0.2",
+    "mapbox-gl": "^3.18.1",
+    "mongoose": "^7.8.7",
+    "multer": "^2.0.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-map-gl": "^8.1.0",
+    "serverless-http": "^3.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
