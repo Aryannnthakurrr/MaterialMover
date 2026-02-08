@@ -2,6 +2,10 @@
 
 A construction materials marketplace with AI-powered semantic search and conversational product advisor.
 
+**Aligned with UN Sustainable Development Goals:**
+- **SDG 12** (Responsible Consumption & Production) — Reducing construction waste through circular material reuse
+- **SDG 17** (Partnerships for the Goals) — Connecting buyers, sellers, contractors, and logistics partners on a shared platform
+
 ## Project Structure
 
 ```

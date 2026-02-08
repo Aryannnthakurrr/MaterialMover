@@ -42,6 +42,20 @@ MaterialMover creates a circular economy for construction materials by intellige
 | Cost Savings | 30-70% savings for buyers compared to new materials |
 | Revenue Recovery | Sellers monetize materials that would otherwise incur disposal costs |
 
+### Impact on Partnerships for the Goals (SDG 17)
+
+MaterialMover functions as a multi-stakeholder partnership platform, connecting diverse actors who would otherwise operate in isolation:
+
+| Partnership | How It Works |
+|-------------|--------------|
+| Buyer-Seller Connections | Individual homeowners gain access to contractor-grade material sources; enterprises reach retail buyers |
+| Contractor Referrals | Material buyers are connected with professional contractors for project execution |
+| Logistics Integration | Platform partnerships with shipping providers (Shiprocket, local transporters) enable end-to-end delivery |
+| Technology Partnerships | Gemini AI, Mapbox, Cloudinary integrations enhance platform capabilities beyond in-house development |
+| Cross-Sector Collaboration | Demolition companies, manufacturers, resellers, and DIY hobbyists share a common marketplace |
+
+The platform creates value precisely because it bridges gaps between parties that traditional market structures keep separate. This partnership-driven model amplifies impact beyond what any single actor could achieve independently.
+
 ---
 
 ## Technical Challenge: The Language of Construction
