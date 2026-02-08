@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useToast } from '../components/Toast';
+import Footer from '../components/Footer';
 import { getToken, getRole, checkTokenExpiry } from '../utils/auth';
 
 export default function Admin() {
@@ -427,6 +428,8 @@ export default function Admin() {
           </section>
         </div>
       </main>
+
+      <Footer />
 
       <style>{`
         .admin-grid {

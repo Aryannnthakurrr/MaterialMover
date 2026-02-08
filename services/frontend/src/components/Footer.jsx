@@ -1,65 +1,64 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/footer.css';
 
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
+    const [searchQuery, setSearchQuery] = useState('');
+    const navigate = useNavigate();
+    const currentYear = new Date().getFullYear();
 
-  return (
-    <footer className="footer">
-      <div className="footer-content">
-        <div className="footer-section">
-          <h3>MaterialMover</h3>
-          <p>Your trusted platform for buying and selling construction materials online.</p>
-          <div className="social-links">
-            <a href="#" aria-label="Facebook">📘</a>
-            <a href="#" aria-label="Twitter">𝕏</a>
-            <a href="#" aria-label="LinkedIn">💼</a>
-            <a href="#" aria-label="Instagram">📷</a>
-          </div>
-        </div>
+    const handleSearch = () => {
+        navigate(`/listings?q=${encodeURIComponent(searchQuery)}`);
+    };
 
-        <div className="footer-section">
-          <h4>Quick Links</h4>
-          <ul>
-            <li><a href="/">Home</a></li>
-            <li><a href="/seller">Become a Seller</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-            <li><a href="/login">Login</a></li>
-          </ul>
-        </div>
+    const handleKeyDown = (e) => {
+        if (e.key === 'Enter') {
+            handleSearch();
+        }
+    };
 
-        <div className="footer-section">
-          <h4>Categories</h4>
-          <ul>
-            <li><a href="/">Wood</a></li>
-            <li><a href="/">Glass</a></li>
-            <li><a href="/">Metals</a></li>
-            <li><a href="/">Cement</a></li>
-            <li><a href="/">Plastic</a></li>
-          </ul>
-        </div>
+    const scrollToTop = () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
-        <div className="footer-section">
-          <h4>Support</h4>
-          <ul>
-            <li><a href="#">Help Center</a></li>
-            <li><a href="#">Contact Us</a></li>
-            <li><a href="#">Privacy Policy</a></li>
-            <li><a href="#">Terms of Service</a></li>
-          </ul>
-        </div>
+    return (
+        <footer className="site-footer">
+            <div className="footer-main">
+                {/* Left - Logo & Tagline */}
+                <div className="footer-brand">
+                    <h2 className="footer-logo">Material Mover</h2>
+                    <p className="footer-tagline">Sustainable construction materials marketplace</p>
+                </div>
 
-        <div className="footer-section">
-          <h4>Contact Info</h4>
-          <p><strong>Email:</strong> <a href="mailto:info@materialmover.com">info@materialmover.com</a></p>
-          <p><strong>Phone:</strong> <a href="tel:+91-000-000-0000">+91-000-000-0000</a></p>
-          <p><strong>Hours:</strong> Mon-Fri, 9AM-6PM IST</p>
-        </div>
-      </div>
+                {/* Center - Navigation */}
+                <nav className="footer-nav">
+                    <button className="footer-nav-link" onClick={scrollToTop}>Home</button>
+                    <button className="footer-nav-link" onClick={() => navigate('/listings')}>Buy</button>
+                    <button className="footer-nav-link" onClick={() => navigate('/seller')}>Sell</button>
+                    <button className="footer-nav-link" onClick={() => navigate('/listings')}>Products</button>
+                </nav>
 
-      <div className="footer-bottom">
-        <p>&copy; {currentYear} MaterialMover. All rights reserved.</p>
-      </div>
-    </footer>
-  );
+                {/* Right - Search */}
+                {/*
+                <div className="footer-search">
+                    <input
+                        type="text"
+                        placeholder="Search materials..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        className="footer-search-input"
+                    />
+                    <button className="footer-search-btn" onClick={handleSearch}>
+                        Search
+                    </button>
+                </div>*/}
+            </div>
+
+            {/* Bottom - Copyright */}
+            <div className="footer-bottom">
+                <p>© {currentYear} MaterialMover. All rights reserved.</p>
+            </div>
+        </footer>
+    );
 }

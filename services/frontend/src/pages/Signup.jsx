@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/earth-scroll.css';
 
 const GOOGLE_CLIENT_ID = '315899476122-jebvtaiu62io7bhej450n8tqcofjmrbi.apps.googleusercontent.com';
@@ -151,35 +152,19 @@ export default function Signup() {
             </button>
           </form>
 
-          <div className="auth-divider">or</div>
+          <div className="auth-divider"></div>
 
           <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}></div>
           <p style={{ textAlign: 'center', fontSize: '13px', color: '#888', marginBottom: '12px' }}>
             Select a role above before signing up with Google (defaults to Buyer)
           </p>
 
-          <div className="auth-info">
-            <p className="info-title">🎯 Choose Your Role</p>
-            <div className="role-cards">
-              <div className="role-card">
-                <div className="role-icon">🛒</div>
-                <h4>Buyer</h4>
-                <p>Search and purchase quality construction materials from verified sellers</p>
-              </div>
-              <div className="role-card">
-                <div className="role-icon">📦</div>
-                <h4>Seller</h4>
-                <p>List your materials and reach potential buyers across the market</p>
-              </div>
-            </div>
-            <p className="auth-note">💡 Admin access is granted by administrators only</p>
-          </div>
-
           <div className="auth-footer">
             <p>Already have an account? <Link to="/login" className="link">Sign in</Link></p>
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

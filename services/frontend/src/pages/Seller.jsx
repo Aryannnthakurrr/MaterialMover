@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import { useToast } from '../components/Toast';
 import { getToken, getRole, checkTokenExpiry, formatPrice, getAuthHeaders } from '../utils/auth';
 import '../styles/seller.css';
@@ -97,7 +98,7 @@ export default function Seller() {
 
   async function handleEditProduct(id) {
     try {
-      const resp = await fetch(`/ api / products / ${id} `, {
+      const resp = await fetch(`/api/products/${id}`, {
         headers: { Authorization: 'Bearer ' + getToken() },
       });
       if (!resp.ok) {
@@ -203,7 +204,7 @@ export default function Seller() {
       return;
     }
 
-    const endpoint = currentEditId ? `/ api / products / ${currentEditId} ` : '/api/products';
+    const endpoint = currentEditId ? `/api/products/${currentEditId}` : '/api/products';
     const method = currentEditId ? 'PUT' : 'POST';
 
     try {
@@ -244,7 +245,7 @@ export default function Seller() {
     }
     try {
       console.log('Deleting product with id:', id);
-      const resp = await fetch(`/ api / products / ${id} `, {
+      const resp = await fetch(`/api/products/${id}`, {
         method: 'DELETE',
         headers: { Authorization: 'Bearer ' + getToken() },
       });
@@ -517,6 +518,7 @@ export default function Seller() {
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

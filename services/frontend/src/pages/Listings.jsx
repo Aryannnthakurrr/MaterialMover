@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import MapView from '../components/MapView';
 import { isLoggedIn, getAuthHeaders } from '../utils/auth';
 import '../styles/earth-scroll.css';
@@ -174,12 +175,12 @@ export default function Listings() {
         {/* Category Title */}
         <h2 className="listings-title">
           {searchMode === 'location'
-            ? `Nearby Listings (${nearbyProducts.length})`
+            ? `Nearby Products (${nearbyProducts.length})`
             : category
-              ? `${category} Listings`
+              ? `${category} Products`
               : query
                 ? `Results for "${query}"`
-                : 'All Listings'}
+                : 'All Products'}
         </h2>
 
         {/* Products Grid */}
@@ -204,6 +205,9 @@ export default function Listings() {
           ← Back to Home
         </button>
       </div>
+
+      {/* Footer */}
+      <Footer />
     </div>
   );
 }

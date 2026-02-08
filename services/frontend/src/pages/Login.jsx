@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Header from '../components/Header';
+import Footer from '../components/Footer';
 import '../styles/earth-scroll.css';
 
 const GOOGLE_CLIENT_ID = '315899476122-jebvtaiu62io7bhej450n8tqcofjmrbi.apps.googleusercontent.com';
@@ -134,24 +135,16 @@ export default function Login() {
             </button>
           </form>
 
-          <div className="auth-divider">or</div>
+          <div className="auth-divider"></div>
 
           <div ref={googleBtnRef} style={{ display: 'flex', justifyContent: 'center', margin: '16px 0' }}></div>
-
-          <div className="auth-info">
-            <p className="info-title">📋 Role Information</p>
-            <ul className="role-list">
-              <li><span className="role-badge buyer">Buyer</span> Any email address</li>
-              <li><span className="role-badge seller">Seller</span> Email containing "seller@"</li>
-              <li><span className="role-badge admin">Admin</span> Email containing "admin@"</li>
-            </ul>
-          </div>
 
           <div className="auth-footer">
             <p>Don't have an account? <Link to="/signup" className="link">Create one</Link></p>
           </div>
         </div>
       </main>
+      <Footer />
     </>
   );
 }

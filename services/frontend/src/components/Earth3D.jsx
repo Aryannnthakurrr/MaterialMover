@@ -244,8 +244,8 @@ export default function Earth3D() {
       starsGroup.rotation.x = mouse.y * 0.5;
 
       // Continuous Earth rotation
-      earth.rotation.y += 0.0002;
-      clouds.rotation.y += 0.00025;
+      earth.rotation.y += 0.002;
+      clouds.rotation.y += 0.0025;
 
       renderer.render(scene, camera);
     };

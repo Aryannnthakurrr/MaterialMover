@@ -125,13 +125,29 @@ export default function Home() {
   const navigate = useNavigate();
 
   const handleBuyClick = () => {
-    setAuthModalMode('buy');
-    setAuthModalOpen(true);
+    if (isLoggedIn()) {
+      // Already logged in, go directly to listings
+      navigate('/listings');
+    } else {
+      setAuthModalMode('buy');
+      setAuthModalOpen(true);
+    }
   };
 
   const handleSellClick = () => {
-    setAuthModalMode('sell');
-    setAuthModalOpen(true);
+    if (isLoggedIn()) {
+      const role = getRole();
+      if (role === 'seller' || role === 'admin') {
+        // Already logged in as seller/admin, go to seller dashboard
+        navigate('/seller');
+      } else {
+        // Logged in as buyer, redirect to listings with a message
+        navigate('/listings');
+      }
+    } else {
+      setAuthModalMode('sell');
+      setAuthModalOpen(true);
+    }
   };
 
   // Set dark background for landing hero
@@ -229,7 +245,7 @@ export default function Home() {
               <button className="hero-btn hero-btn-buy" onClick={handleBuyClick}>Buy</button>
               <button className="hero-btn hero-btn-sell" onClick={handleSellClick}>Sell</button>
             </div>
-            <h1>MaterialMover</h1>
+            <h1>Material Mover</h1>
             <p>Sustainable construction materials marketplace</p>
           </div>
         </section>
@@ -320,8 +336,9 @@ export default function Home() {
         mode={authModalMode}
         navigate={navigate}
       />
-      
 
+      {/* Footer */}
+      <Footer />
     </>
   );
 }
