@@ -12,11 +12,11 @@ COPY services/frontend/ ./
 RUN npm run build
 
 # ---- Stage 2: Production image ----
-FROM ubuntu:22.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies (Ubuntu 24.04 has Python 3.12)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     nginx \
@@ -24,13 +24,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     python3-venv \
     supervisor \
+    ca-certificates \
+    gnupg \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Node 20 via nodesource (Ubuntu 22.04 ships old Node)
+# Install Node 20 via nodesource
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get remove -y libnode-dev libnode72 nodejs npm 2>/dev/null || true \
-    && apt-get autoremove -y \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
