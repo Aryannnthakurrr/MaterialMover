@@ -38,10 +38,11 @@ WORKDIR /app
 
 # ---- Node backend ----
 COPY services/backend/package*.json services/backend/
-RUN cd services/backend && npm ci --omit=dev
+RUN cd services/backend && npm install --production
 
 # ---- Python search service ----
 COPY services/search/requirements.txt services/search/
+COPY services/search/pyproject.toml services/search/
 RUN python3 -m venv /app/services/search/.venv \
     && /app/services/search/.venv/bin/pip install --no-cache-dir --upgrade pip \
     && /app/services/search/.venv/bin/pip install --no-cache-dir -r services/search/requirements.txt
@@ -49,7 +50,6 @@ RUN python3 -m venv /app/services/search/.venv \
 # ---- Copy application code ----
 COPY services/backend/ services/backend/
 COPY services/search/app/ services/search/app/
-COPY services/search/pyproject.toml services/search/
 
 # ---- Copy built frontend ----
 COPY --from=frontend-build /app/services/frontend/dist services/frontend/dist
