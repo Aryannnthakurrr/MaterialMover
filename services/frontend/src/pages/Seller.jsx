@@ -158,9 +158,9 @@ export default function Seller() {
       });
       const result = await resp.json();
       if (resp.ok) {
-        setUploadedImagePath(result.path);
+        setUploadedImagePath(result.url);
         setImageUrl('');
-        toast.success('Image uploaded successfully');
+        toast.success('Image uploaded to Cloudinary successfully');
       } else {
         toast.error('Upload failed: ' + result.message);
       }

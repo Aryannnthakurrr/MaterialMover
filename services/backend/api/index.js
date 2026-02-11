@@ -3,6 +3,7 @@ require('dotenv').config({ path: path.join(__dirname, '../../../.env') });
 const dns = require('dns');
 dns.setServers(['8.8.8.8', '8.8.4.4', '1.1.1.1']);
 const express = require('express');
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 // init
 const app = express();
@@ -22,6 +23,12 @@ app.use('/api/auth', require('../server/routes/auth'));
 app.use('/api/products', require('../server/routes/products'));
 app.use('/api/upload', require('../server/routes/upload'));
 
+// Proxy /chat requests to the Python search service
+app.use('/chat', createProxyMiddleware({
+    target: 'http://localhost:8000',
+    changeOrigin: true,
+}));
+
 // Basic health
 app.get('/api/health', (req, res) => res.json({ ok: true }));
 
@@ -30,8 +37,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../../frontend/dist/index.html'));
 });
 
-// If running locally start express server
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+// Start express server (locally or in Docker)
+if (!process.env.VERCEL) {
     const port = process.env.PORT || 3000;
     app.listen(port, () => console.log(`Server listening on http://localhost:${port}`));
 }

@@ -1,0 +1,13 @@
+# Deployment ignores
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.env
+.env.local
+.git/
+.DS_Store
+services/search/cache/
+services/frontend/node_modules/
+services/backend/node_modules/
