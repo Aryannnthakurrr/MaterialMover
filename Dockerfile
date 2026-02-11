@@ -23,15 +23,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     python3-venv \
-    nodejs \
-    npm \
     supervisor \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Node 20 via nodesource (Ubuntu 22.04 ships old Node)
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get remove -y libnode-dev libnode72 nodejs npm 2>/dev/null || true \
+    && apt-get autoremove -y \
+    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
+
 
 WORKDIR /app
 
